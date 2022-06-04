@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using RefactorThis.Persistence;
 
@@ -16,6 +17,7 @@ namespace RefactorThis.Domain
 		public string ProcessPayment(Payment payment)
 		{
 			var inv = _invoiceRepository.GetInvoice(payment.Reference);
+			var sumOfPayments = inv.Payments.Sum(x => x.Amount);
 
 			var responseMessage = string.Empty;
 
@@ -37,10 +39,9 @@ namespace RefactorThis.Domain
 			{
 				if (inv.Payments != null && inv.Payments.Any())
 				{
-					if (inv.Payments.Sum(x => x.Amount) != 0 && inv.Amount == inv.Payments.Sum(x => x.Amount))
-						responseMessage = "invoice was already fully paid";
+					if (sumOfPayments != 0 && sumOfPayments == inv.Amount) responseMessage = "invoice was already fully paid";
 					
-					else if (inv.Payments.Sum(x => x.Amount) != 0 && payment.Amount > (inv.Amount - inv.AmountPaid))					
+					else if (sumOfPayments != 0 && payment.Amount > (inv.Amount - inv.AmountPaid))					
 						responseMessage = "the payment is greater than the partial amount remaining";
 					
 					else
@@ -49,8 +50,7 @@ namespace RefactorThis.Domain
 							responseMessage = "final partial payment received, invoice is now fully paid";
 						
 						else						
-							responseMessage = "another partial payment received, still not fully paid";
-						
+							responseMessage = "another partial payment received, still not fully paid";						
 
 						inv.AmountPaid += payment.Amount;
 						inv.Payments.Add(payment);
@@ -58,19 +58,15 @@ namespace RefactorThis.Domain
 				}
 				else
 				{
-					if (payment.Amount > inv.Amount)					
-						responseMessage = "the payment is greater than the invoice amount";					
+					if (payment.Amount > inv.Amount) responseMessage = "the payment is greater than the invoice amount";					
 					else 
 					{						
-						if (inv.Amount == payment.Amount)
-							responseMessage = "invoice is now fully paid";
-						else
-							responseMessage = "invoice is now partially paid";
+						if (inv.Amount == payment.Amount) responseMessage = "invoice is now fully paid";
+						else responseMessage = "invoice is now partially paid";
 
 						inv.AmountPaid = payment.Amount;
 						inv.Payments.Add(payment);
-					}
-					
+					}					
 				}
 			}
 			
