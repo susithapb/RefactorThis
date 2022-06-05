@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RefactorThis.Persistence
 {
-    internal class InvoiceContext : DbContext
+    public class InvoiceContext : DbContext
     {
         public InvoiceContext() : base("name=InvoiceContext")
         {

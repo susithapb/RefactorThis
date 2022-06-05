@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RefactorThis.Persistence
 {
-    internal interface IInvoiceRepository
+    public interface IInvoiceRepository
     {
 		Invoice GetInvoice(string reference);
 
